@@ -1,4 +1,4 @@
-# eng1420-project
+# engg1420-project
 
 ## TODO
 

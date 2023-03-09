@@ -28,5 +28,3 @@
   - [ ] Proces input entries in parallel
   - [ ] Run `ProcessingElement`s in parallel
   - [ ] Send entry metadata to later `ProcessingElement`s before sending content
-  - [ ] Stream entry content to later `ProcessingElement`s
-  - [ ] Use stream-optimized algorithms for searching in content.

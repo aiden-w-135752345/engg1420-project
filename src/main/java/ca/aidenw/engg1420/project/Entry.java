@@ -4,6 +4,10 @@
  */
 package ca.aidenw.engg1420.project;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.stream.Stream;
+
 /**
  * @author Lucy
  * @author Leonardo
@@ -11,6 +15,11 @@ package ca.aidenw.engg1420.project;
  * @author Vanessa
  * @author Aiden
  */
-public class Entry {
-    
+public abstract class Entry {
+    public abstract CompletionStage<String> name();
+    public abstract CompletionStage<String> path();
+    public abstract CompletionStage<Boolean>isDirectory();
+    public abstract CompletionStage<Long> length();
+    public abstract CompletionStage<String[]> fileContents();
+    public abstract CompletionStage<Stream<Entry>> dirContents();
 }

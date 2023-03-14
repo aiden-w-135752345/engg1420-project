@@ -4,6 +4,14 @@
  */
 package ca.aidenw.engg1420.project;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 /**
  * @author Lucy
  * @author Leonardo
@@ -11,6 +19,48 @@ package ca.aidenw.engg1420.project;
  * @author Vanessa
  * @author Aiden
  */
-public class ProcessingElement {
+public abstract class ProcessingElement {
+    static class Parameter extends AbstractMap.SimpleEntry<String,String>{
+        
+        @Override @JsonGetter("name")
+        public String getKey(){return super.getKey();}
+        @Override @JsonGetter("value")
+        public String getValue(){return super.getValue();}
+        @Override @JsonSetter("value")
+        public String setValue(String value){return super.setValue(value);}
+        @JsonCreator
+        Parameter(@JsonProperty("name")String name, @JsonProperty("value") String value){super(name,value);}
+    };
+    @JsonProperty("input_entries") private Entry[] input_entries;
     
+    @JsonCreator
+    private ProcessingElement fromJSON(@JsonProperty("type") String typeName,
+            @JsonProperty("parameters") Parameter[] parameters
+    ){
+        Class<? extends ProcessingElement> typeClass;
+        switch (typeName) {
+            case "NameFilter" -> typeClass=NameFilter.class;
+            case "LengthFilter" -> typeClass=LengthFilter.class;
+            case "ContentFilter" -> typeClass=ContentFilter.class;
+            case "CountFilter" -> typeClass=CountFilter.class;
+            case "Split" -> typeClass=Split.class;
+            case "List" -> typeClass=ListFiles.class;
+            case "Rename" -> typeClass=Rename.class;
+            case "Print" -> typeClass=Print.class;
+            default -> throw new IllegalArgumentException();
+        }
+        ObjectMapper paramMapper=new ObjectMapper();
+        return paramMapper.convertValue(Map.ofEntries(parameters), typeClass);
+    }
+    abstract protected void accept(Entry entry);
+    protected ProcessingElement next;
+    public final void setNext(ProcessingElement before){this.next=this;}
+    public final void start(){
+        CompletableFuture[] cfs=new CompletableFuture[input_entries.length];
+        for(int i=0;i<input_entries.length;++i){
+            final Entry entry=input_entries[i];
+            cfs[i]=CompletableFuture.runAsync(()->{this.accept(entry);},Main.executor);
+        }
+        CompletableFuture.allOf(cfs).join();
+    }
 }

@@ -4,11 +4,11 @@
  */
 package ca.aidenw.engg1420.project;
 
-import com.laserfiche.repository.api.RepositoryApiClient;
+import com.laserfiche.repository.api.clients.EntriesClient;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 import java.util.stream.Stream;
 /**
  * @author Lucy
@@ -18,64 +18,76 @@ import java.util.stream.Stream;
  * @author Aiden
  */
 public class RemoteEntry extends Entry {
-    private static RepositoryApiClient client;
+    private static EntriesClient client;
     private final String repositoryId;
     private final int entryId;
     public RemoteEntry(String repo,int entry){repositoryId=repo;entryId=entry;}
-    public void setApiClient(RepositoryApiClient c){client=c;}
+    public static void setClient(EntriesClient c){client=c;}
+    private String name;
+    private String path;
+    private Boolean isDirectory;
     
-    private CompletionStage<com.laserfiche.repository.api.clients.impl.model.Entry> metadata;
     private void getMetadata(){
-        if(metadata==null){metadata=client.getEntriesClient().getEntry(repositoryId, entryId, null);}
+        com.laserfiche.repository.api.clients.impl.model.Entry metadata=client.getEntry(repositoryId, entryId, null).join();
+        name=metadata.getName();
+        path=metadata.getFolderPath();
+        isDirectory=metadata.isContainer();
     }
     @Override
-    public CompletionStage<String> name(){
-        getMetadata();
-        return metadata.thenApply(x->{return x.getName();});
+    public String name(){
+        if(name==null)getMetadata();
+        return name;
     };
     @Override
-    public CompletionStage<String> path(){
-        getMetadata();
-        return metadata.thenApply(x->{return x.getName();});
+    public String path(){
+        if(path==null)getMetadata();
+        return path;
     };
     @Override
-    public CompletionStage<Boolean>isDirectory(){
-        getMetadata();
-        return metadata.thenApply(x->{return x.isContainer();});
+    public boolean isDirectory(){
+        if(isDirectory==null)getMetadata();
+        return isDirectory;
     };
-    private CompletableFuture<Long> length;
+    private Long length;
     @Override
-    public CompletionStage<Long> length(){
+    public long length(){
         if(length==null){
-            length=client.getEntriesClient().getDocumentContentType(repositoryId, entryId).thenApply(x->Long.valueOf(x.get("Content-Length")));
+            length=Long.valueOf(client.getDocumentContentType(repositoryId, entryId).join().get("Content-Length"));
         }
         return length;
     };
-    private CompletableFuture<String[]> fileContents;
+    private String[] fileContents;
     @Override
-    public CompletionStage<String[]> fileContents(){
+    public String[] fileContents(){
         if(fileContents==null){
-            fileContents=new CompletableFuture();
-            client.getEntriesClient().exportDocument(
-                repositoryId, entryId, null,
-                x->fileContents.complete(new BufferedReader(new InputStreamReader(x)).lines().toArray(String[]::new))
-            );
+            CompletableFuture<String[]>future=new CompletableFuture();
+            client.exportDocument(repositoryId, entryId, null,x->{
+                try(Stream<String> stream=new BufferedReader(new InputStreamReader(x)).lines()){
+                    future.complete(stream.toArray(String[]::new));
+                }
+            });
+            fileContents=future.join();
         }
         return fileContents;
     };
-    private CompletionStage<Stream<Entry>> dirContents;
     @Override
-    public CompletionStage<Stream<Entry>> dirContents(){
-        if (dirContents == null) {
-            dirContents=client.getEntriesClient().getEntryListing(
-                    repositoryId, entryId, true, null, null, null, null, 
-                    null, "name", null, null, null
-            ).thenApply(x->x.getValue().stream().map(y->{
-                RemoteEntry entry =new RemoteEntry(repositoryId,y.getId());
-                entry.metadata=CompletableFuture.completedFuture(y);
-                return entry;
-            }));
-        }
-        return dirContents;
+    public void dirContents(Function<Entry,Boolean> consumer){
+        client.getEntryListingForEach(
+                z->z.thenApply(y->y.getValue().stream().allMatch(x->{
+                    RemoteEntry entry=new RemoteEntry(repositoryId,x.getId());
+                        entry.name=x.getName();
+                        entry.path=x.getFolderPath();
+                        entry.isDirectory=x.isContainer();
+                    return consumer.apply(entry);
+                })),
+                null,repositoryId,entryId,
+                true, null, null, null, null,null, "name", null, null, null
+        ).join();
     }
+
+    @Override
+    public void rename(String newname) {throw new UnsupportedOperationException("Not supported.");}
+
+    @Override
+    public Entry makeFile(String name, String[] contents) {throw new UnsupportedOperationException("Not supported.");}
 }

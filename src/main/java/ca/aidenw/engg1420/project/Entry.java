@@ -4,9 +4,7 @@
  */
 package ca.aidenw.engg1420.project;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.stream.Stream;
+import java.util.function.Function;
 
 /**
  * @author Lucy
@@ -16,10 +14,12 @@ import java.util.stream.Stream;
  * @author Aiden
  */
 public abstract class Entry {
-    public abstract CompletionStage<String> name();
-    public abstract CompletionStage<String> path();
-    public abstract CompletionStage<Boolean>isDirectory();
-    public abstract CompletionStage<Long> length();
-    public abstract CompletionStage<String[]> fileContents();
-    public abstract CompletionStage<Stream<Entry>> dirContents();
+    public abstract String name();
+    public abstract String path();
+    public abstract boolean isDirectory();
+    public abstract long length();
+    public abstract String[] fileContents();
+    public abstract void dirContents(Function<Entry,Boolean> consumer);
+    public abstract void rename(String newname);
+    public abstract Entry makeFile(String name,String[] contents);
 }

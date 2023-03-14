@@ -32,15 +32,18 @@ public class Main {
      */
     public static void main(String[] args) throws JsonProcessingException, IOException {
         try(var client=RepositoryApiClientImpl.createFromAccessKey(null,AccessKey.createFromBase64EncodedAccessKey(null))){
-            RemoteEntry.setClient(client.getEntriesClient());
-            ObjectMapper objectMapper = new ObjectMapper();
+            RemoteEntry.setClient(client.getEntriesClient()); // load keys
+            
+            // read description
+            ObjectMapper objectMapper = new ObjectMapper(); 
             Main scenario = objectMapper.readValue(new File(args[1]), Main.class);
+            
             ProcessingElement prev = null;
             for (ProcessingElement next : scenario.processing_elements) {
                 if (prev != null) prev.setNext(next);
                 prev = next;
             }
-            prev.setNext(new ProcessingElement(){@Override protected void accept(Entry entry) {/* ignore */}});
+            if (prev != null) prev.setNext(new ProcessingElement(){@Override protected void accept(Entry entry) {/* ignore */}});
             for (ProcessingElement elem : scenario.processing_elements) {elem.start();}
         }
     }

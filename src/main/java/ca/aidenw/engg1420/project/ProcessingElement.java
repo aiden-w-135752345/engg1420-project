@@ -20,8 +20,28 @@ import java.util.concurrent.CompletableFuture;
  * @author Aiden
  */
 public abstract class ProcessingElement {
-    static class Parameter extends AbstractMap.SimpleEntry<String,String>{
-        
+    @JsonProperty("input_entries") private Entry[] input_entries;
+    /**
+     * provide an Entry to this ProcessingElement.
+     * this element will process the entry, and can call next.accept() to pass it on to the next entry
+     * @param entry
+     */
+    abstract protected void accept(Entry entry);
+    protected ProcessingElement next;
+    public final void setNext(ProcessingElement before){this.next=this;}
+    /**
+     * Starts processing, beginning with the input entries specified in the scenario description
+     */
+    public final void start(){
+        CompletableFuture[] cfs=new CompletableFuture[input_entries.length];
+        for(int i=0;i<input_entries.length;++i){
+            final Entry entry=input_entries[i];
+            cfs[i]=CompletableFuture.runAsync(()->{this.accept(entry);},Main.executor);
+        }
+        CompletableFuture.allOf(cfs).join();
+    }
+    // JSON parsing stuff follows...
+    private static class Parameter extends AbstractMap.SimpleEntry<String,String>{
         @Override @JsonGetter("name")
         public String getKey(){return super.getKey();}
         @Override @JsonGetter("value")
@@ -30,9 +50,7 @@ public abstract class ProcessingElement {
         public String setValue(String value){return super.setValue(value);}
         @JsonCreator
         Parameter(@JsonProperty("name")String name, @JsonProperty("value") String value){super(name,value);}
-    };
-    @JsonProperty("input_entries") private Entry[] input_entries;
-    
+    };    
     @JsonCreator
     private ProcessingElement fromJSON(@JsonProperty("type") String typeName,
             @JsonProperty("parameters") Parameter[] parameters
@@ -51,16 +69,5 @@ public abstract class ProcessingElement {
         }
         ObjectMapper paramMapper=new ObjectMapper();
         return paramMapper.convertValue(Map.ofEntries(parameters), typeClass);
-    }
-    abstract protected void accept(Entry entry);
-    protected ProcessingElement next;
-    public final void setNext(ProcessingElement before){this.next=this;}
-    public final void start(){
-        CompletableFuture[] cfs=new CompletableFuture[input_entries.length];
-        for(int i=0;i<input_entries.length;++i){
-            final Entry entry=input_entries[i];
-            cfs[i]=CompletableFuture.runAsync(()->{this.accept(entry);},Main.executor);
-        }
-        CompletableFuture.allOf(cfs).join();
     }
 }

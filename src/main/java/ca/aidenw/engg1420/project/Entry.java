@@ -19,6 +19,10 @@ public abstract class Entry {
     public abstract boolean isDirectory();
     public abstract long length();
     public abstract String[] fileContents();
+    /**
+     * Reads directory contents, passing the Entries to `consumer`, until `consumer` returns false.
+     * @param consumer
+     */
     public abstract void dirContents(Function<Entry,Boolean> consumer);
     public abstract void rename(String newname);
     public abstract Entry makeFile(String name,String[] contents);

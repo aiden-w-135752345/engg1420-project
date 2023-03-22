@@ -8,7 +8,7 @@ import com.laserfiche.repository.api.clients.EntriesClient;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 /**
  * @author Lucy
@@ -71,15 +71,20 @@ public class RemoteEntry extends Entry {
         return fileContents;
     };
     @Override
-    public void dirContents(Function<Entry,Boolean> consumer){
+    public void dirContents(Predicate<Entry> consumer){
         client.getEntryListingForEach(
-                z->z.thenApply(y->y.getValue().stream().allMatch(x->{
-                    RemoteEntry entry=new RemoteEntry(repositoryId,x.getId());
-                        entry.name=x.getName();
-                        entry.path=x.getFolderPath();
-                        entry.isDirectory=x.isContainer();
-                    return consumer.apply(entry);
-                })),
+                z->z.thenApply(y->{
+                    try(var stream=y.getValue().stream()){
+                        for(var x: (Iterable<com.laserfiche.repository.api.clients.impl.model.Entry>)(stream::iterator)){
+                            RemoteEntry entry=new RemoteEntry(repositoryId,x.getId());
+                            entry.name=x.getName();
+                            entry.path=x.getFolderPath();
+                            entry.isDirectory=x.isContainer();
+                            if(!consumer.test(entry)){return false;}
+                        }
+                    }
+                    return true;
+                }),
                 null,repositoryId,entryId,
                 true, null, null, null, null,null, "name", null, null, null
         ).join();

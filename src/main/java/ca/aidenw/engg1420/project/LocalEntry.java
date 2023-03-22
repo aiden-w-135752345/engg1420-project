@@ -10,9 +10,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -60,12 +58,12 @@ public class LocalEntry extends Entry {
         return fileContents;
     }
     @Override
-    public void dirContents(Function<Entry,Boolean> consumer){
+    public void dirContents(Predicate<Entry> consumer){
         try(Stream<Path> files=Files.list(Path.of(path+name))){
-            files.allMatch(x->{
+            for(Path x: (Iterable<Path>)(files::iterator)){
                 int count = x.getNameCount();
-                return consumer.apply(new LocalEntry(x.getName(count-1).toString(),x.getParent().toString()));
-            });
+                if(!consumer.test(new LocalEntry(x.getName(count-1).toString(),x.getParent().toString()))){break;}
+            }
         } catch (IOException ex) {throw new UncheckedIOException(ex);}
     }
 

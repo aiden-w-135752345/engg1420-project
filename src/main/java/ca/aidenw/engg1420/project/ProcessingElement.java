@@ -5,7 +5,6 @@
 package ca.aidenw.engg1420.project;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,9 +41,7 @@ public abstract class ProcessingElement {
     }
     // JSON parsing stuff follows...
     private static class Parameter extends AbstractMap.SimpleEntry<String,String>{
-        @Override @JsonGetter("name")
         public String getKey(){return super.getKey();}
-        @Override @JsonGetter("value")
         public String getValue(){return super.getValue();}
         @Override @JsonSetter("value")
         public String setValue(String value){return super.setValue(value);}

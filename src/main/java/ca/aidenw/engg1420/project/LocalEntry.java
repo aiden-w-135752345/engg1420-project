@@ -12,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Lucy
@@ -21,18 +23,30 @@ import java.util.stream.Stream;
  * @author Aiden
  */
 public class LocalEntry extends Entry {
-    private String name;
     private final String path;
-    public LocalEntry(String name,String path){this.name=name;this.path=path;}
+    private String name;
+    private final String extension;
+    @JsonCreator
+    public LocalEntry(@JsonProperty("path")String path){
+        int idx=path.lastIndexOf('/');
+        if(idx>=0){this.path=path.substring(0,idx+1);name=path.substring(idx+1);}
+        else{this.path="";name=path;}
+        idx=name.lastIndexOf('.');
+        if(idx>=0){extension=name.substring(idx);name=name.substring(0,idx);}
+        else{extension="";}
+    }
+    public LocalEntry(String path,String name,String extension){this.path=path;this.name=name;this.extension=extension;}
+    @Override
+    public String path(){return path;}
     @Override
     public String name(){return name;}
     @Override
-    public String path(){return path;}
+    public String extension(){return extension;}
     private Boolean isDirectory;
     private Long size;
     private void getMetadata(){
         try {
-            BasicFileAttributes metadata=Files.readAttributes(Path.of(path+name),BasicFileAttributes.class);
+            BasicFileAttributes metadata=Files.readAttributes(Path.of(path+name+extension),BasicFileAttributes.class);
             isDirectory=metadata.isDirectory();
             size=metadata.size();
         } catch (IOException ex) {throw new UncheckedIOException(ex);}
@@ -52,17 +66,16 @@ public class LocalEntry extends Entry {
     public String[] fileContents(){
         if(fileContents==null){
             try {
-                fileContents=Files.readAllLines(Path.of(path+name)).toArray(String[]::new);
+                fileContents=Files.readAllLines(Path.of(path+name+extension)).toArray(String[]::new);
             } catch (IOException ex) {throw new UncheckedIOException(ex);}
         }
         return fileContents;
     }
     @Override
-    public void dirContents(Predicate<Entry> consumer){
-        try(Stream<Path> files=Files.list(Path.of(path+name))){
+    public void dirContents(Predicate<Entry> callback){
+        try(Stream<Path> files=Files.list(Path.of(path+name+extension))){
             for(Path x: (Iterable<Path>)(files::iterator)){
-                int count = x.getNameCount();
-                if(!consumer.test(new LocalEntry(x.getName(count-1).toString(),x.getParent().toString()))){break;}
+                if(!callback.test(new LocalEntry(x.toString()))){break;}
             }
         } catch (IOException ex) {throw new UncheckedIOException(ex);}
     }
@@ -70,15 +83,15 @@ public class LocalEntry extends Entry {
     @Override
     public void rename(String newname) {
         try {
-            Files.move(Path.of(path+name),Path.of(newname,path));
+            Files.move(Path.of(path+name+extension),Path.of(path+newname+extension));
             name=newname;
         } catch (IOException ex) {throw new UncheckedIOException(ex);}        
     }
 
     @Override
     public Entry makeFile(String name, String[] contents) {
-        try (BufferedWriter writer=Files.newBufferedWriter(Path.of(path+name))){
-            LocalEntry entry=new LocalEntry(name,path);
+        try (BufferedWriter writer=Files.newBufferedWriter(Path.of(path+name+extension))){
+            LocalEntry entry=new LocalEntry(path,name,extension);
             entry.isDirectory=false;
             entry.size=0L;
             entry.fileContents=contents;

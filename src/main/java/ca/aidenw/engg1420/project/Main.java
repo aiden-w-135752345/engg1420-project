@@ -53,7 +53,7 @@ public class Main {
             RemoteEntry.setClient(client.getEntriesClient());
             // start running
             CompletableFuture[] cfs=new CompletableFuture[scenario.processing_elements.length];
-            for(int i=0;i<scenario.processing_elements.length;++i){
+            for(int i = 0; i < scenario.processing_elements.length; ++i ) {
                 final ProcessingElement elem=scenario.processing_elements[i];
                 cfs[i]=CompletableFuture.runAsync(elem::start,Main.executor);
             }

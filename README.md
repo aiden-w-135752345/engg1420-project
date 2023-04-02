@@ -25,5 +25,5 @@
   - [x] This README
 
 ## Optional multithreading
-  - [ ] Proces input entries in parallel
+  - [x] Proces input entries in parallel
   - [ ] Run `ProcessingElement`s in parallel

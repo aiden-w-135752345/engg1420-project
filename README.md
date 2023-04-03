@@ -18,7 +18,7 @@
   - [ ] `ListFiles extends ProcessingElement` (called List in description) 
   - [ ] `Rename extends ProcessingElement`
   - [ ] `Print extends ProcessingElement`
-- [ ] Other
+- [x] Other
   - [x] Scenario Parser
   - [x] Scenario Executor
   - [x] `Main`

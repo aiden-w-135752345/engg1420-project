@@ -49,7 +49,7 @@ public abstract class ProcessingElement {
         Parameter(@JsonProperty("name")String name, @JsonProperty("value") String value){super(name,value);}
     };    
     @JsonCreator
-    private ProcessingElement fromJSON(@JsonProperty("type") String typeName,
+    public ProcessingElement fromJSON(@JsonProperty("type") String typeName,
             @JsonProperty("parameters") Parameter[] parameters
     ){
         Class<? extends ProcessingElement> typeClass;

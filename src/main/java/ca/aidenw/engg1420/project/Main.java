@@ -39,10 +39,11 @@ public class Main {
         // read description
         Main scenario;
         try {
-            scenario = new ObjectMapper().readValue(new File(args[1]), Main.class);
+            scenario = new ObjectMapper().readValue(new File(args[0]), Main.class);
         } catch (IOException ex) {
-            System.out.println("Could not read scenario description. ");
-            System.exit(42);return;
+            System.out.printf("Could not read scenario description at %s. \n",new File(args[0]).getAbsolutePath());
+            ex.printStackTrace();
+            System.exit(1);return;
         }
         // connect ProccesingElements
         ProcessingElement prev = null;
@@ -53,7 +54,7 @@ public class Main {
         // ignore outputs of the last ProcessingElement
         if (prev != null) prev.setNext(new ProcessingElement(){@Override protected void accept(Entry entry) {/* ignore */}});
         // load keys and connect to LaserFiche
-        try(RepositoryApiClient client=RepositoryApiClientImpl.createFromAccessKey( args[2],AccessKey.createFromBase64EncodedAccessKey(args[3]))){
+        try(RepositoryApiClient client=RepositoryApiClientImpl.createFromAccessKey( args[1],AccessKey.createFromBase64EncodedAccessKey(args[2]))){
             RemoteEntry.setClient(client.getEntriesClient());
             // start running
             CompletableFuture[] cfs=new CompletableFuture[scenario.processing_elements.length];

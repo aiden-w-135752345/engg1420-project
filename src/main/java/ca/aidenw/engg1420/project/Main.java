@@ -32,6 +32,10 @@ public class Main {
      * @param args[3] the access key for LaserFiche
      */
     public static void main(String[] args){
+        if(args.length<3){
+            System.out.println("usage: java -jar engg1420-project-1.0-SNAPSHOT.jar scenarioDescription.json servicePricipalKey accessKey");
+            System.exit(1);
+        }
         // read description
         Main scenario;
         try {

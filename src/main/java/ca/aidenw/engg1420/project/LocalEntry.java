@@ -11,9 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.nio.file.DirectoryStream;
 
 /**
  * @author Lucy
@@ -28,18 +28,13 @@ public class LocalEntry extends Entry {
     private final String extension;
     private Path fullPath;
     @JsonCreator
-    public LocalEntry(@JsonProperty("path")String path){
-        fullPath=Path.of(path);
-        int idx=path.lastIndexOf('/');
-        if(idx>=0){this.path=path.substring(0,idx+1);name=path.substring(idx+1);}
-        else{this.path="";name=path;}
-        idx=name.lastIndexOf('.');
-        if(idx>=0){extension=name.substring(idx);name=name.substring(0,idx);}
+    public LocalEntry(@JsonProperty("path")String path){this(Path.of(path));}
+    public LocalEntry(Path path){
+        fullPath=path.normalize();
+        this.path=fullPath.getParent().toString();name=fullPath.getFileName().toString();
+        int idx=name.lastIndexOf('.');
+        if(idx>0){extension=name.substring(idx);name=name.substring(0,idx);}
         else{extension="";}
-    }
-    public LocalEntry(String path,String name,String extension){
-        this.path=path;this.name=name;this.extension=extension;
-        fullPath=Path.of(path+name+extension);
     }
     @Override
     public String path(){return path;}
@@ -78,9 +73,9 @@ public class LocalEntry extends Entry {
     }
     @Override
     public void dirContents(Predicate<Entry> callback){
-        try(Stream<Path> files=Files.list(fullPath)){
-            for(Path x: (Iterable<Path>)(files::iterator)){
-                if(!callback.test(new LocalEntry(x.toString()))){break;}
+        try(DirectoryStream<Path> files=Files.newDirectoryStream(fullPath)){
+            for(Path x: files){
+                if(!callback.test(new LocalEntry(x))){break;}
             }
         } catch (IOException ex) {throw new UncheckedIOException(ex);}
     }
@@ -88,8 +83,8 @@ public class LocalEntry extends Entry {
     @Override
     public void rename(String newname) {
         name=newname;
+        Path target=fullPath.resolveSibling(newname+extension);
         try {
-            Path target=Path.of(path+newname+extension);
             Files.move(fullPath,target);
             fullPath=target;
         } catch (IOException ex) {if(warnWriteFail){
@@ -99,13 +94,13 @@ public class LocalEntry extends Entry {
 
     @Override
     public Entry makeFile(String name, String[] contents) {
-        LocalEntry entry=new LocalEntry(path,name,extension);
+        LocalEntry entry=new LocalEntry(fullPath.resolveSibling(name+extension));
         entry.isDirectory = false;
         entry.length = 0L;
         entry.fileContents = contents;
         for (String line : contents) {entry.length += line.length() + 1;}
         
-        try (BufferedWriter writer=Files.newBufferedWriter(Path.of(path+name+extension))){
+        try (BufferedWriter writer=Files.newBufferedWriter(entry.fullPath)){
             for(String line:contents){writer.write(line);writer.write('\n');}
         } catch (IOException ex) {if(warnWriteFail){
             System.out.println("Warning: some local entries failed to write.");warnWriteFail=false;

@@ -6,9 +6,7 @@ package ca.aidenw.engg1420.project;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.AbstractMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 /**
@@ -27,7 +25,7 @@ public abstract class ProcessingElement {
      */
     abstract protected void accept(Entry entry);
     protected ProcessingElement next;
-    public final void setNext(ProcessingElement before){this.next=this;}
+    public final void setNext(ProcessingElement after){this.next=after;}
     /**
      * Starts processing, beginning with the input entries specified in the scenario description
      */
@@ -40,16 +38,19 @@ public abstract class ProcessingElement {
         CompletableFuture.allOf(cfs).join();
     }
     // JSON parsing stuff follows...
-    private static class Parameter extends AbstractMap.SimpleEntry<String,String>{
-        public String getKey(){return super.getKey();}
-        public String getValue(){return super.getValue();}
-        @Override @JsonSetter("value")
-        public String setValue(String value){return super.setValue(value);}
-        @JsonCreator
-        Parameter(@JsonProperty("name")String name, @JsonProperty("value") String value){super(name,value);}
+    private static class Parameter implements Map.Entry<String,String>{
+        @JsonProperty("name") public String key;
+        @JsonProperty("value") public String value;
+        @Override
+        public String getKey(){return key;}
+        @Override
+        public String getValue(){return value;}
+        @Override
+        public String setValue(String newValue){String oldValue=value;value=newValue;return oldValue;}
+        public String setKey(String newKey){String oldKey=key;key=newKey;return oldKey;}
     };    
     @JsonCreator
-    public ProcessingElement fromJSON(@JsonProperty("type") String typeName,
+    private static ProcessingElement fromJSON(@JsonProperty("type") String typeName,
             @JsonProperty("parameters") Parameter[] parameters
     ){
         Class<? extends ProcessingElement> typeClass;

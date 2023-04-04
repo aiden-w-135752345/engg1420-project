@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.laserfiche.repository.api.clients.EntriesClient;
 import com.laserfiche.repository.api.clients.impl.ApiException;
+import com.laserfiche.repository.api.clients.impl.model.ODataValueContextOfIListOfEntry;
 import com.laserfiche.repository.api.clients.impl.model.PatchEntryRequest;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -90,25 +91,26 @@ public class RemoteEntry extends Entry {
     };
     @Override
     public void dirContents(Predicate<Entry> callback){
-        client.getEntryListingForEach(
-                z->z.thenApply(y->{
-                    try(var stream=y.getValue().stream()){
-                        for(var x: (Iterable<com.laserfiche.repository.api.clients.impl.model.Entry>)(stream::iterator)){
-                            RemoteEntry entry=new RemoteEntry(repoId,x.getId());
-                            entry.parentId=x.getParentId();
-                            entry.path=x.getFolderPath();
-                            String name=x.getName();int idx=name.lastIndexOf('.');
-                            if(idx>=0){entry.extension=name.substring(idx);entry.name=name.substring(0,idx);}
-                            else{entry.name=name;entry.extension="";}
-                            entry.isDirectory=x.isContainer();
-                            if(!callback.test(entry)){return false;}
-                        }
-                    }
-                    return true;
-                }),
-                null,repoId,entryId,
-                true, null, null, null, null,null, "name", null, null, null
+        ODataValueContextOfIListOfEntry response = client.getEntryListing(
+                repoId,entryId, null,null, null, null,
+                null, null, "name", null, null, null
         ).join();
+        for(;;) {
+            for(var x: response.getValue()){
+                RemoteEntry entry=new RemoteEntry(repoId,x.getId());
+                entry.parentId=x.getParentId();
+                entry.path=x.getFolderPath();
+                String name=x.getName();int idx=name.lastIndexOf('.');
+                if(idx>=0){entry.extension=name.substring(idx);entry.name=name.substring(0,idx);}
+                else{entry.name=name;entry.extension="";}
+                entry.isDirectory=x.isContainer();
+                if(!callback.test(entry)){return;}
+            }
+            
+            String nextLink=response.getOdataNextLink();
+            if(nextLink==null){return;}
+            response = client.getEntryListingNextLink(nextLink, null).join();
+        }
     }
     private static boolean warnWriteFail=true;
     @Override

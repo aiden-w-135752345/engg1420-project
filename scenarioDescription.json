@@ -30,6 +30,16 @@
                 }
             ]
         },
+       {
+			"type": "Rename",
+			"input_entries": [],
+			"parameters": [
+				{
+					"name": "Suffix",
+					"value": "_edited"
+				}
+			]
+		},
         {
             "type": "Print",
             "input_entries": [],

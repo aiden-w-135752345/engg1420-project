@@ -4,9 +4,6 @@
  */
 package ca.aidenw.engg1420.project;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 
@@ -21,7 +18,7 @@ public class ContentFilter extends Filter {
     @JsonProperty("Key")
     private String key;
     @Override
-    public boolean condition(Entry entry){
+    protected boolean condition(Entry entry){
             /* read the entries line by line to search for the key */
             for (String line : entry.fileContents()) {
                 /* if the line of text contains the key string */

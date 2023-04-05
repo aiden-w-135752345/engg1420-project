@@ -4,9 +4,6 @@
  */
 package ca.aidenw.engg1420.project;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -22,7 +19,7 @@ public class CountFilter extends Filter {
     @JsonProperty("Min")
     private int min;
     @Override
-    public boolean condition(Entry entry){
+    protected boolean condition(Entry entry){
             int count = 0;
             /* read the entries line by line to search for the key */
             for (String line : entry.fileContents()) {

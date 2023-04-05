@@ -149,4 +149,8 @@ public class RemoteEntry extends Entry {
         }}
         return entry;
     }
+    @Override
+    public String toString(){
+        return "%s (id %d, %d bytes) at %s%s%s".formatted(this.name(),this.entryId,this.length(),this.path(),this.name(),this.extension());
+    }
 }

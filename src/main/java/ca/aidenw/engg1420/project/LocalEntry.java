@@ -30,7 +30,7 @@ public class LocalEntry extends Entry {
     @JsonCreator
     public LocalEntry(@JsonProperty("path")String path){this(Path.of(path));}
     public LocalEntry(Path path){
-        fullPath=path.normalize();
+        fullPath=path.toAbsolutePath();
         this.path=fullPath.getParent().toString();name=fullPath.getFileName().toString();
         int idx=name.lastIndexOf('.');
         if(idx>0){extension=name.substring(idx);name=name.substring(0,idx);}
@@ -106,5 +106,9 @@ public class LocalEntry extends Entry {
             System.out.println("Warning: some local entries failed to write.");warnWriteFail=false;
         }}
         return entry;
+    }
+    @Override
+    public String toString(){
+        return "%s (%d bytes) at %s%s%s".formatted(this.name,this.length(),this.path,this.name,this.extension);
     }
 }

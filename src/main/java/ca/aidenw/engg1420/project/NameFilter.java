@@ -3,6 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package ca.aidenw.engg1420.project;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Lucy
@@ -24,6 +26,12 @@ public class NameFilter extends ProcessingElement {
         /* reformat the list back into an array to standardize output */
         Entry[] output = list.toArray(new Entry[0]);
         return output;
+    }
+
+    @Override
+    protected void accept(Entry entry) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'accept'");
     }   
 }  
     

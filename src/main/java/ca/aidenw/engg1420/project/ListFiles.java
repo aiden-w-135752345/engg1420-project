@@ -27,9 +27,9 @@ public class ListFiles extends ProcessingElement {
         List<File> selectedEntries = new ArrayList<>(); 
 
         // Loop through each entry in the input list.
-        for (File entry : entries) { 
+        for (File entry : entries) {
             // Check if the entry is a directory.
-            if (entry.isDirectory()) { 
+            if (entry.isDirectory()) {
                 // Get an array of all the files in the directory.
                 File[] files = entry.listFiles(); 
 
@@ -38,7 +38,7 @@ public class ListFiles extends ProcessingElement {
                 int numSelectedFiles = Math.min(numFiles, Max); 
                 
                 // Loop through the selected files in the directory.
-                for (int i = 0; i < numSelectedFiles; i++) { 
+                for (int i = 0; i < numSelectedFiles; i++) {
                     // Add the selected file to the output list.
                     selectedEntries.add(files[i]); 
                 }
@@ -47,34 +47,5 @@ public class ListFiles extends ProcessingElement {
         
         // Return the list of selected entries.
         return selectedEntries; 
-    }
-        
-        // Create another directory object for testing.
-        File directory2 = new File("directory2"); 
-        // Make the directory if it doesn't exist.
-        directory2.mkdirs(); 
-        
-        // Create 50 files in directory2.
-        for (int i = 1; i <= 50; i++) { 
-            File file = new File(directory2, "file" + i + ".txt");
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        
-        // Create a list of directory entries for testing.
-        List<File> entries = new ArrayList<>(); 
-        entries.add(directory1);
-        entries.add(directory2);
-        
-        // Select up to 20 entries from each directory.
-        List<File> selectedEntries = selectEntries(entries, 20); 
-        
-        // Print out the selected entries for verification.
-        for (File entry : selectedEntries) { 
-            System.out.println(entry.getName());
-        }
     }
 }

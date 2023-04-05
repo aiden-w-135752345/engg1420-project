@@ -13,8 +13,12 @@ import java.util.List;
  *      on a specified number of lines, and creates new files for each part. 
  *      The output is a list of the generated files.
  * @author Lucy
+ * @author Leonardo
+ * @author Daniel
+ * @author Vanessa
+ * @author Aiden
  */
-public class Split {
+public class Split extends ProcessingElement {
     
     /*
     * Description: The splitFiles method takes a list of input files and 
@@ -80,26 +84,6 @@ public class Split {
         }
         // return the list of output files
         return outputFiles;
-    }
-
-    /*
-    * The main method is an example usage of the splitFiles method, where two input files 
-    * "File1.txt" and "File2.txt" are created and the value of lines is set to 10.
-    * The output file names are printed to the console for verification purposes.
-    */
-    public static void main(String[] args) throws IOException {
-        // create a list of input files
-        List<File> inputFiles = new ArrayList<File>();
-        inputFiles.add(new File("File1.txt"));
-        inputFiles.add(new File("File2.txt"));
-        // set the number of lines for each part
-        int lines = 10;
-        // call the splitFiles method with the input files and lines
-        List<File> outputFiles = splitFiles(inputFiles, lines);
-        // print the names of the output files
-        for (File outputFile : outputFiles) {
-            System.out.println(outputFile.getName());
-        }
     }
 
 }

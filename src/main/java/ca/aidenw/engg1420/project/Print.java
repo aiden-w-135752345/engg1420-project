@@ -12,5 +12,8 @@ package ca.aidenw.engg1420.project;
  * @author Aiden
  */
 public class Print extends ProcessingElement {
-    
+    @Override
+    protected void accept(Entry entry) {
+        System.out.println(entry);
+    }
 }

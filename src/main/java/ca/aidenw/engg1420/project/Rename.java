@@ -26,6 +26,7 @@ public class Rename extends ProcessingElement {
   /*Seperate main method for entries donloaded from the server.
   *Changes will be made on the local system
   */
+  /*
   public static void main(String[] argv) throws IOException {
         //Path which the entries are saved on the local system
         File folder = new File("\\Users\\16474\\OneDrive - University of Guelph\\Documents\\ENGG 1420\\Entries\\PrimeNumbers");
@@ -37,6 +38,8 @@ public class Rename extends ProcessingElement {
   for (int i = 0; i < listOfFiles.length; i++) {
         if (listOfFiles[i].isFile()) {
             String oldName = listOfFiles[i].getName();
+  //Regular expressions used in java. [^\\.] finds any character not in that bracket i.e the words like folder name. 
+  //$ represents the end of a string, which is why suffix is represented by .$1 - meaning a new end is added to the string. 
             String newName = oldName.replaceFirst("\\.([^\\.]+)$", Suffix + ".$1");
             File oldFile = new File(folder, oldName);
             File newFile = new File(folder, newName);
@@ -45,4 +48,5 @@ public class Rename extends ProcessingElement {
     }
         System.out.println("conversion is done");
     }
+*/
 }

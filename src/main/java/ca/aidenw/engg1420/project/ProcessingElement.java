@@ -38,15 +38,15 @@ public abstract class ProcessingElement {
         CompletableFuture.allOf(cfs).join();
     }
     // JSON parsing stuff follows...
-    private static class Parameter implements Map.Entry<String,String>{
+    private static class Parameter implements Map.Entry<String,Object>{
         @JsonProperty("name") public String key;
-        @JsonProperty("value") public String value;
+        @JsonProperty("value") public Object value;
         @Override
         public String getKey(){return key;}
         @Override
-        public String getValue(){return value;}
+        public Object getValue(){return value;}
         @Override
-        public String setValue(String newValue){String oldValue=value;value=newValue;return oldValue;}
+        public Object setValue(Object newValue){Object oldValue=value;value=newValue;return oldValue;}
         public String setKey(String newKey){String oldKey=key;key=newKey;return oldKey;}
     };    
     @JsonCreator

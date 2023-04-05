@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package ca.aidenw.engg1420.project;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,30 +17,18 @@ import java.util.List;
  * @author Vanessa
  * @author Aiden
  */
-public class ContentFilter extends ProcessingElement {
-    public static Entry[] content(Entry[] entries,String key){
-        /* empty list to be appended to with the entries containing the key */
-        List<Entry> list = new ArrayList<>();
-        for (Entry entry : entries){
+public class ContentFilter extends Filter {
+    @JsonProperty("Key")
+    private String key;
+    @Override
+    public boolean condition(Entry entry){
             /* read the entries line by line to search for the key */
-            List<String> allLines = Arrays.asList(entry.fileContents());
-
-            for (String line : allLines) {
+            for (String line : entry.fileContents()) {
                 /* if the line of text contains the key string */
                 if(line.contains(key)){
-                    list.add(entry); // add the entry to the list of entries
-                    break; // end iteration to prevent duplicate entries
+                    return true;
                 }
             }
-        }
-        /* reformat the list back into an array to standardize output */
-        Entry[] output = list.toArray(new Entry[0]);
-        return output;
+            return false;
     }
-
-    @Override
-    protected void accept(Entry entry) {
-        throw new UnsupportedOperationException("Unimplemented method 'accept'");
-    }     
-    
 }

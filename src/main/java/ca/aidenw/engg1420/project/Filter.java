@@ -11,6 +11,10 @@ package ca.aidenw.engg1420.project;
  * @author Vanessa
  * @author Aiden
  */
-public class Filter extends ProcessingElement {
-    
+public abstract class Filter extends ProcessingElement {
+    protected abstract boolean condition(Entry entry);
+    @Override
+    protected void accept(Entry entry) {
+        if(condition(entry)){next.accept(entry);}
+    }
 }

@@ -3,7 +3,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package ca.aidenw.engg1420.project;
-
 /**
  * @author Lucy
  * @author Leonardo

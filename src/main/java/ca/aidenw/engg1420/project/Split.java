@@ -8,12 +8,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-// Note: this code assumes that the input files are located in the same directory as the Java program.
-
 /**
- * This Java code takes a list of files, splits each file into parts based 
- *      on a specified number of lines, and creates new files for each part. 
- *      The output is a list of the generated files.
+ * This takes a list of files, 
+ *      splits each file into parts based on a specified number of lines, 
+ *      and creates new files for each part. 
+ *      The output is a list of files.
  * @author Lucy
  * @author Leonardo
  * @author Daniel
@@ -23,10 +22,10 @@ import java.util.List;
 public class Split extends ProcessingElement {
     
     /*
-    * Description: The splitFiles method takes a list of input files and 
-    * an integer lines as parameters. It reads each input file line by 
-    * line, and for each lines number of lines, it creates a new output 
-    * file. The output files are stored in a list.
+    * This takes a list of input files and an integer lines as parameters.
+    *       It reads each input file line by line,
+    *       and for each line, it creates a new output file. 
+    *       The output files are stored in a list.
     */
     public static List<File> splitFiles(List<File> inputFiles, int lines) throws IOException {
         // create an empty list to store output files

@@ -5,9 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This takes in a list of directory entries and a maximum value, and returns a list of selected entries from each 
- *      directory in the input list. It first creates two directories with files for testing, then calls a method 
- *      that selects up to Max entries from each directory, and returns them as a list.
+ * This takes in a list of directory entries and a maximum value, 
+ *      and returns a list of selected entries from each directory.
  * @author Lucy
  * @author Leonardo
  * @author Daniel
@@ -16,7 +15,8 @@ import java.util.List;
  */
 public class ListFiles extends ProcessingElement {
     /**
-     * A method that takes in a list of directory entries and an integer Max, and returns a list of selected entries.
+     * This takes in a list of directory entries and an integer Max,
+     *      and returns a list of selected entries.
      *
      * @param entries The list of directory entries to process.
      * @param Max     The maximum number of entries to select from each directory.
